@@ -3,10 +3,12 @@
 #include <msp430.h>
 #include <stdbool.h>
 #include "heartbeat.h"
+#include "led_bar.h"
 
 void init()
 {
-    init_heartbeat();
+    //init_heartbeat();
+    init_led_bar();
 }
 
 int main(void)
