@@ -5,8 +5,9 @@
 #include "led_bar.h"
 
 //int key_input;
-int input_bool = 1;
-int i;
+int new_input_bool = true;
+int pattern3_out = true;
+int input = 5;              // ToDo: remove this line and input from keypad instead
 
 //------------------------------------------------------------------------------
 // Begin led initialization
@@ -27,8 +28,8 @@ void init_led_bar()
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
     
     // Setup Ports
+    P3OUT &= ~0xFF;             // Clear  Pin 3 to start
     P3DIR |= 0xFF;              // Config Pin 3 as output
-    P3OUT |= 0xFF;              // Clear  Pin 3 to start
 
     // Setup Timer
     TB1CTL |= TBCLR;            // Clear timers and dividers
@@ -45,15 +46,13 @@ void init_led_bar()
     // Disable the GPIO power-on default high-impedance mode to activate
     // previously configure port settings
     PM5CTL0 &= ~LOCKLPM5;
-
-    P3OUT = ledPattern03_init;
 }
 //--End LED Initialization------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // Begin LED patterns
 //------------------------------------------------------------------------------
-void ledPatterns(int key_input) 
+void led_patterns(int key_input) 
 {
     switch(key_input)
     {
@@ -65,54 +64,69 @@ void ledPatterns(int key_input)
             if (TB1CCR0 + 8192 < 0xFFFF)
                 TB1CCR0 + 8192;
             break;
-        case 0:             // All LEDs off
+        case '\0':          // All LEDs off
             P3OUT = ledOff;
             break;
         case 1:             // Toggle
-            if (input_bool == 1) {
+            if (new_input_bool == true) {
                 P3OUT = ledPattern01_init;
-                input_bool = 0;
+                new_input_bool = false;
             } else
                 P3OUT ^= 0xFF;
             break;
         case 2:             // Up counter
-            if (input_bool == 1) {
+            if (new_input_bool == true) {
                 P3OUT = ledPattern02_init;
-                input_bool = 0;
+                new_input_bool = false;
             } else
                 P3OUT++;
             break;
         case 3:             // in and out
-            for (i=0;i<3;i++)
-                P3OUT = ~P3OUT & ((0xF0 & P3OUT << 1) | (0xF & P3OUT >> 1) | P3OUT << 7 | P3OUT >> 7);  // out
-            for (i=0;i<3;i++)
-                P3OUT = ~P3OUT & ((0xF & P3OUT << 1) | (0xF0 & P3OUT >> 1) | P3OUT << 7 | P3OUT >> 7);  // in
+            if (new_input_bool == true) {
+                P3OUT = ledPattern03_init;
+                new_input_bool = false;
+            }
+            else if ((pattern3_out == true & P3OUT != 0b10000001) | (pattern3_out == false & P3OUT == 0b00011000))  // out
+            {
+                P3OUT = ~P3OUT & ((0xF0 & P3OUT << 1) | (0xF & P3OUT >> 1) | P3OUT << 7 | P3OUT >> 7);
+                pattern3_out = true;
+            }
+            else if ((pattern3_out == false & P3OUT != 0b00011000) | (pattern3_out == true & P3OUT == 0b10000001))  // in
+            {
+                P3OUT = ~P3OUT & ((0xF & P3OUT << 1) | (0xF0 & P3OUT >> 1) | P3OUT << 7 | P3OUT >> 7);
+                pattern3_out = false;
+            }
             break;
         case 4:             // down counter, extra credit
-            if (input_bool == 1) {
+            if (new_input_bool == true) {
                 P3OUT = ledPattern04_init;
-                input_bool = 0;
+                new_input_bool = false;
             } else
                 P3OUT--;
             break;
         case 5:             // rotate one left, extra credit
-        if (input_bool == 1) {
+        if (new_input_bool == true) {
                 P3OUT = ledPattern05_init;
-                input_bool = 0;
+                new_input_bool = false;
             } else
                 P3OUT = P3OUT << 1 | P3OUT >> 7;
             break;
         case 6:             // rotate 7 right, extra credit
-            if (input_bool == 1) {
+            if (new_input_bool == true) {
                 P3OUT = ledPattern06_init;
-                input_bool = 0;
+                new_input_bool = false;
             } else
                 P3OUT = P3OUT >> 1 | P3OUT << 7;
             break;
         case 7:             // fill to the left, extra credit
             break;
-
     }
+}
+
+void call_led_bar()
+{
+
+    led_patterns(4);
 }
 
 
@@ -122,7 +136,7 @@ void ledPatterns(int key_input)
 #pragma vector = TIMER1_B0_VECTOR
 __interrupt void ISR_TB1_CCR0(void)
 {
-    ledPatterns(2);
+    led_patterns(input);
     TB1CCTL0 &= ~CCIFG;
 }
 //-- End Interrupt Service Routines --------------------------------------------
