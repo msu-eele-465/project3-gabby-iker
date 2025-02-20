@@ -1,8 +1,9 @@
-//#include <msp430.h>
+#include <msp430.h>
 #include "msp430fr2355.h"
+#include "intrinsics.h"
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdbool.h>
+
 
 //CONSTANTS DECLARATION
 #define COL 4
@@ -20,7 +21,7 @@
 
 char real_code[] = {'3','9','4','1'};
 
-char teclado[ROW][COL] = {
+char keypad[ROW][COL] = {
     {'1', '2', '3', 'A'},
     {'4', '5', '6', 'B'},
     {'7', '8', '9', 'C'},
@@ -40,17 +41,54 @@ void InitializePorts_KeyPad()
     P2OUT &= ~0x17;   // Initalize columns down
 }
 
-void Initialize_RGB()
+void Initialize_PinsRGB()
+{       
+    P1DIR |= BIT5 | BIT6 | BIT7; // Set P1.5, P1.6 y P1.7 as an output 
+    P1OUT &= ~(BIT5 | BIT6 | BIT7); // Initialize outputs as low
+    P1OUT |= BIT5;
+    P1OUT |= BIT6;
+    P1OUT |= BIT7;
+}
+
+void Initialize_Interrupts()
 {
-    P6DIR |= BIT1 | BIT2 | BIT3;   // Set pins P6.1, P6.2, y P6.3 as outputs
-    P6SEL1 |= BIT1 | BIT2 | BIT3;   // Selecciona la función secundaria de los pines
+    //Set up timer 3
+    TB3CTL |= TBCLR;
+    TB3CTL |= TBSSEL__ACLK;
+    
+    //Set up timer compare 3.1 (Pull up)
+    TB3CCTL0 &= ~CCIFG;
+    TB3CCTL0 |= CCIE;
+    TB3CCR0 |= 255;
+
+    //Set up timer compare 3.2 (Pull down RED)
+    TB3CCTL1 &= ~CCIFG;
+    TB3CCTL1 |= CCIE;
+    TB3CCR1 |= 196;
+    TB3CCTL1 |= OUTMOD__7;
+
+    //Set up timer compare 3.3 (Pull down GREEN)
+    TB3CCTL2 &= ~CCIFG;
+    TB3CCTL2 |= CCIE;
+    TB3CCR2 |= 62;
+    TB3CCTL2 | = OUTMOD_7;
+
+    //Set up timer compare 3.4 (Pull down BLUE)
+    TB3CCTL3 &= ~CCIFG;
+    TB3CCTL3 |= CCIE;
+    TB3CCR3 |= 29;
+    TB3CCTL3 | = OUTMOD_7;
+
+    TB3CTL |= MC__UP;
+
+
+    _enable_interrupt();
 }
 
 // Read digit from keypad function
 char read_digit()
 {
 int row, col;
-volatile int colorState;
 
     // Go through 4 columns
     for (col = 0; col < 4; col++) {
@@ -64,7 +102,7 @@ volatile int colorState;
                 //Chech if the row is pressed (low)
                 //debounce();  // Agregar debounce
                 //if ((P1IN & (1 << fila)) == 0) {  // Confirmar que sigue presionada            
-                return teclado[row][col];                   
+                return keypad[row][col];                   
                 //}
             }
         }
@@ -74,6 +112,8 @@ volatile int colorState;
 
     return 0; // No key pressed
 }
+
+
 
 int main(void)
 {
@@ -87,9 +127,11 @@ int main(void)
     int counter, i, equal;
     char introduced_password[TABLE_SIZE], key;
     volatile int colorState;
+
     InitializePorts_KeyPad();
-    Initialize_RGB();
-     
+    Initialize_PinsRGB();
+    Initialize_Interrupts();
+    
     while(true)
     {   
      counter = 0;
@@ -132,5 +174,32 @@ int main(void)
     }    
 }
 
+#pragma vector = TIMER3_B0_VECTOR
+__interrupt void ISR_TB3_CCR0(void)
+{
+    P1OUT |= BIT5;
+    P1OUT |= BIT6;
+    P1OUT |= BIT7;
+    TB3CCTL0 &= ~CCIFG;
+}
 
+#pragma vector = TIMER3_B1_VECTOR
+__interrupt void ISR_TB3_CCR1(void)
+{
+    P1OUT &=~ BIT5;
+    TB3CCTL1 &= ~CCIFG;
+}
 
+#pragma vector = TIMER3_B2_VECTOR
+__interrupt void ISR_TB3_CCR2(void)
+{
+    P1OUT &=~ BIT6;
+    TB3CCTL2 &= ~CCIFG;
+}
+
+#pragma vector = TIMER3_B3_VECTOR
+__interrupt void ISR_TB3_CCR3(void)
+{
+    P1OUT &=~ BIT7;
+    TB3CCTL3 &= ~CCIFG;
+}
