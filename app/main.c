@@ -12,12 +12,11 @@
 
 //END CONSTANTS DECLARATION
 
-//void debounce() {
-  //  volatile unsigned int i;
-    //for (i = 0; i < 50000; i++) {
-      //  // Simple retardo para debounce
-   // }
-//}
+void debounce() {
+    volatile unsigned int i;
+    for (i = 0; i < 20000; i++) {
+    }
+}
 
 char real_code[] = {'3','9','4','1'};
 
@@ -41,49 +40,49 @@ void InitializePorts_KeyPad()
     P2OUT &= ~0x17;   // Initalize columns down
 }
 
-void Initialize_PinsRGB()
-{       
-    P1DIR |= BIT5 | BIT6 | BIT7; // Set P1.5, P1.6 y P1.7 as an output 
-    P1OUT &= ~(BIT5 | BIT6 | BIT7); // Initialize outputs as low
-    P1OUT |= BIT5;
-    P1OUT |= BIT6;
-    P1OUT |= BIT7;
-}
+//void Initialize_PinsRGB()
+//{       
+//    P1DIR |= BIT5 | BIT6 | BIT7; // Set P1.5, P1.6 y P1.7 as an output 
+//    P1OUT &= ~(BIT5 | BIT6 | BIT7); // Initialize outputs as low
+  //  P1OUT |= BIT5;
+    //P1OUT |= BIT6;
+//    P1OUT |= BIT7;
+//}
 
-void Initialize_Interrupts()
-{
+//void Initialize_Interrupts()
+//{
     //Set up timer 3
-    TB3CTL |= TBCLR;
-    TB3CTL |= TBSSEL__ACLK;
+  //  TB3CTL |= TBCLR;
+    //TB3CTL |= TBSSEL__ACLK;
     
     //Set up timer compare 3.1 (Pull up)
-    TB3CCTL0 &= ~CCIFG;
-    TB3CCTL0 |= CCIE;
-    TB3CCR0 |= 255;
+    //TB3CCTL0 &= ~CCIFG;
+    //TB3CCTL0 |= CCIE;
+    //TB3CCR0 |= 255;
 
     //Set up timer compare 3.2 (Pull down RED)
-    TB3CCTL1 &= ~CCIFG;
-    TB3CCTL1 |= CCIE;
-    TB3CCR1 |= 196;
-    TB3CCTL1 |= OUTMOD__7;
+    //TB3CCTL1 &= ~CCIFG;
+    //TB3CCTL1 |= CCIE;
+    //TB3CCR1 |= 196;
+    //TB3CCTL1 |= OUTMOD__7;
 
     //Set up timer compare 3.3 (Pull down GREEN)
-    TB3CCTL2 &= ~CCIFG;
-    TB3CCTL2 |= CCIE;
-    TB3CCR2 |= 62;
-    TB3CCTL2 | = OUTMOD_7;
+    //TB3CCTL2 &= ~CCIFG;
+    //TB3CCTL2 |= CCIE;
+    //TB3CCR2 |= 62;
+    //TB3CCTL2 | = OUTMOD_7;
 
     //Set up timer compare 3.4 (Pull down BLUE)
-    TB3CCTL3 &= ~CCIFG;
-    TB3CCTL3 |= CCIE;
-    TB3CCR3 |= 29;
-    TB3CCTL3 | = OUTMOD_7;
+    //TB3CCTL3 &= ~CCIFG;
+    //TB3CCTL3 |= CCIE;
+    //TB3CCR3 |= 29;
+    //TB3CCTL3 | = OUTMOD_7;
 
-    TB3CTL |= MC__UP;
+    //TB3CTL |= MC__UP;
 
 
-    _enable_interrupt();
-}
+    //_enable_interrupt();
+//}
 
 // Read digit from keypad function
 char read_digit()
@@ -94,15 +93,20 @@ int row, col;
     for (col = 0; col < 4; col++) {
         // Put column down (active)
         P2OUT &= ~(1 << col);   // P2.0, P2.1, P2.2, P2.4
-        
-        // Check rows
+         __delay_cycles(1000);  // Pequeña pausa para estabilizar la señal
+
+        // Recorre las 4 filas
         for (row = 0; row < 4; row++) {
-            if ((P1IN & (1 << row)) == 0) 
-            {  
-                //Chech if the row is pressed (low)
-                //debounce();  // Agregar debounce
-                //if ((P1IN & (1 << fila)) == 0) {  // Confirmar que sigue presionada            
-                return keypad[row][col];                   
+            if ((P1IN & (1 << row)) == 0) {  // Se detecta que la fila está en bajo
+                debounce();  // Espera para filtrar el rebote
+                //if ((P1IN & (1 << row)) == 0) {  // Confirma que la tecla sigue presionada
+                    char key = keypad[row][col];
+                    // Espera a que se suelte la tecla para evitar múltiples lecturas
+                    while ((P1IN & (1 << row)) == 0){
+                    // Desactiva la columna antes de retornar
+                    P2OUT |= (1 << col);
+                    return key;
+                    }
                 //}
             }
         }
@@ -126,18 +130,19 @@ int main(void)
     
     int counter, i, equal;
     char introduced_password[TABLE_SIZE], key;
-    volatile int colorState;
+    
+   
 
     InitializePorts_KeyPad();
-    Initialize_PinsRGB();
-    Initialize_Interrupts();
+    //Initialize_PinsRGB();
+    //Initialize_Interrupts();
     
     while(true)
     {   
+
      counter = 0;
      key = 0;
-     equal = 1;
-
+    
      printf("Introduce the code\n");
 
      while (counter < TABLE_SIZE)
@@ -150,14 +155,15 @@ int main(void)
         }        
      }
 
-     //Compare the introduced code with the real code      
-        for (i = 0; i < TABLE_SIZE; i++) {
-            if (introduced_password[i] != real_code[i]) 
-            {
-                equal = 0;
-                break;
-            }
+     //Compare the introduced code with the real code   
+     equal = 1;   
+     for (i = 0; i < TABLE_SIZE; i++) {
+        if (introduced_password[i] != real_code[i]) 
+        {
+            equal = 0;
+            break;
         }
+    }
 
         // Verify the code
         if (equal==1) 
@@ -174,32 +180,32 @@ int main(void)
     }    
 }
 
-#pragma vector = TIMER3_B0_VECTOR
-__interrupt void ISR_TB3_CCR0(void)
-{
-    P1OUT |= BIT5;
-    P1OUT |= BIT6;
-    P1OUT |= BIT7;
-    TB3CCTL0 &= ~CCIFG;
-}
+//#pragma vector = TIMER3_B0_VECTOR
+//__interrupt void ISR_TB3_CCR0(void)
+//{
+//    P1OUT |= BIT5;
+//    P1OUT |= BIT6;
+//    P1OUT |= BIT7;
+//    TB3CCTL0 &= ~CCIFG;
+//}
 
-#pragma vector = TIMER3_B1_VECTOR
-__interrupt void ISR_TB3_CCR1(void)
-{
-    P1OUT &=~ BIT5;
-    TB3CCTL1 &= ~CCIFG;
-}
+//#pragma vector = TIMER3_B1_VECTOR
+//__interrupt void ISR_TB3_CCR1(void)
+//{
+//    P1OUT &=~ BIT5;
+//    TB3CCTL1 &= ~CCIFG;
+//}
 
-#pragma vector = TIMER3_B2_VECTOR
-__interrupt void ISR_TB3_CCR2(void)
-{
-    P1OUT &=~ BIT6;
-    TB3CCTL2 &= ~CCIFG;
-}
+//#pragma vector = TIMER3_B2_VECTOR
+//__interrupt void ISR_TB3_CCR2(void)
+//{
+//    P1OUT &=~ BIT6;
+//    TB3CCTL2 &= ~CCIFG;
+//}
 
-#pragma vector = TIMER3_B3_VECTOR
-__interrupt void ISR_TB3_CCR3(void)
-{
-    P1OUT &=~ BIT7;
-    TB3CCTL3 &= ~CCIFG;
-}
+//#pragma vector = TIMER3_B3_VECTOR
+//__interrupt void ISR_TB3_CCR3(void)
+//{
+//    P1OUT &=~ BIT7;
+//    TB3CCTL3 &= ~CCIFG;
+//}
