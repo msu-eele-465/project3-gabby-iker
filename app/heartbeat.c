@@ -10,8 +10,8 @@ void init_heartbeat()
     WDTCTL = WDTPW | WDTHOLD;               // Stop watchdog timer
     
     // Setup Ports
-    P1DIR |= BIT0;              // Config P1.0 as output
-    P1OUT &= ~BIT0;             // Clear 1.0 to start
+    P6DIR |= BIT6;              // Config P1.0 as output
+    P6OUT &= ~BIT6;             // Clear 1.0 to start
     PM5CTL0 &= ~LOCKLPM5;       // Turn on GPIO
 
     // Setup Timer
@@ -31,6 +31,6 @@ void init_heartbeat()
 #pragma vector = TIMER0_B0_VECTOR
 __interrupt void ISR_TB0_CCR0(void)
 {
-    P1OUT ^= BIT0;
+    P6OUT ^= BIT6;
     TB0CCTL0 &= ~CCIFG;
 }

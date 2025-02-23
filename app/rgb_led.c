@@ -25,17 +25,17 @@ void Initialize_Interrupts()
     TB3CCTL0 &= ~CCIFG;     // Clear CCR0 Flag
 
     // Setup Timer Compare IRQ for CCR0 (Pull down RED)
-    TB3CCR1 = 196;         // CCR1=196
+    TB3CCR1 = 225-196;         // CCR1=196
     TB3CCTL1 |= CCIE;       //Enable TB3 CCR1 Overflow IRQ
     TB3CCTL1 &= ~CCIFG;     // Clear CCR1 Flag
 
     // Setup Timer Compare IRQ for CCR0 (Pull down GREEN)
-    TB3CCR2 = 62;          // CCR2=62
+    TB3CCR2 = 225-62;          // CCR2=62
     TB3CCTL2 |= CCIE;       //Enable TB3 CCR1 Overflow IRQ
     TB3CCTL2 &= ~CCIFG;     // Clear CCR2 Flag
 
     // Setup Timer Compare IRQ for CCR0 (Pull down BLUE)
-    TB3CCR3 = 29;          //CCR3=29
+    TB3CCR3 = 225-29;          //CCR3=29
     TB3CCTL3 |= CCIE;       //Enable TB3 CCR1 Overflow IRQ
     TB3CCTL3 &= ~CCIFG;     // Clear CCR3 Flag
 
@@ -44,17 +44,17 @@ void Initialize_Interrupts()
 
 void led_c43e1d(void)           // Red
 {
-    TB3CCR1 = 196;             // CCR1=196 (Red)
-    TB3CCR2 = 62;              // CCR2=62  (Green)
-    TB3CCR3 = 29;              //CCR3=29   (Blue)
+    TB3CCR1 = 220;             // CCR1=196 (Red)
+    TB3CCR2 = 1;              // CCR2=62  (Green)
+    TB3CCR3 = 1;              //CCR3=29   (Blue)
 
 }
 
 void led_c4921d(void)           // Yellow
 {
-    TB3CCR1 = 196;             // CCR1=196 (Red)
-    TB3CCR2 = 146;             // CCR2=146 (Green)
-    TB3CCR3 = 29;              //CCR3=29   (Blue)
+    TB3CCR1 = 220;             // CCR1=196 (Red)
+    TB3CCR2 = 160;             // CCR2=146 (Green)
+    TB3CCR3 = 5;              //CCR3=29   (Blue)
 }
 
 void led_1da2c4(void)           // Blue
@@ -64,13 +64,6 @@ void led_1da2c4(void)           // Blue
     TB3CCR3 = 196;             //CCR3=196  (Blue)
 }
 
-void led_test(void)
-{
-    TB3CCR1 = 0;              // CCR1=29  (Red)
-    TB3CCR2 = 0;             // CCR2=162 (Green)
-    TB3CCR3 = 200;             //CCR3=196  (Blue)
-}
-
 void init_rgb_led(void)
 {
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
@@ -78,7 +71,7 @@ void init_rgb_led(void)
 
     Initialize_PinsRGB();
     Initialize_Interrupts();
-    led_test();
+    led_c4921d();
        
 }
 
