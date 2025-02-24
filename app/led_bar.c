@@ -7,7 +7,11 @@
 //int key_input;
 int new_input_bool = true;
 int pattern3_out = true;
-int input = 5;              // ToDo: remove this line and input from keypad instead
+volatile int key_input;
+int current_pattern;
+int next_pattern;
+char current_key;
+char next_key;
 
 //------------------------------------------------------------------------------
 // Begin led initialization
@@ -52,36 +56,36 @@ void init_led_bar()
 //------------------------------------------------------------------------------
 // Begin LED patterns
 //------------------------------------------------------------------------------
-void led_patterns(int key_input) 
+void led_patterns(char key_input) 
 {
     switch(key_input)
     {
         case 'A':
             if (TB1CCR0 - 8192 > 0)
-                TB1CCR0 - 8192;
+                TB1CCR0 = TB1CCR0 - 8192;
             break;
         case 'B':
             if (TB1CCR0 + 8192 < 0xFFFF)
-                TB1CCR0 + 8192;
+                TB1CCR0 = TB1CCR0 + 8192;
             break;
-        case '\0':          // All LEDs off
-            P3OUT = ledOff;
+        case '0':           // Static state
+            P3OUT = ledPattern01_init;
             break;
-        case 1:             // Toggle
+        case '1':           // Toggle
             if (new_input_bool == true) {
                 P3OUT = ledPattern01_init;
                 new_input_bool = false;
             } else
                 P3OUT ^= 0xFF;
             break;
-        case 2:             // Up counter
+        case '2':             // Up counter
             if (new_input_bool == true) {
                 P3OUT = ledPattern02_init;
                 new_input_bool = false;
             } else
                 P3OUT++;
             break;
-        case 3:             // in and out
+        case '3':             // in and out
             if (new_input_bool == true) {
                 P3OUT = ledPattern03_init;
                 new_input_bool = false;
@@ -97,21 +101,21 @@ void led_patterns(int key_input)
                 pattern3_out = false;
             }
             break;
-        case 4:             // down counter, extra credit
+        case '4':             // down counter, extra credit
             if (new_input_bool == true) {
                 P3OUT = ledPattern04_init;
                 new_input_bool = false;
             } else
                 P3OUT--;
             break;
-        case 5:             // rotate one left, extra credit
+        case '5':             // rotate one left, extra credit
         if (new_input_bool == true) {
                 P3OUT = ledPattern05_init;
                 new_input_bool = false;
             } else
                 P3OUT = P3OUT << 1 | P3OUT >> 7;
             break;
-        case 6:             // rotate 7 right, extra credit
+        case '6':             // rotate 7 right, extra credit
             if (new_input_bool == true) {
                 P3OUT = ledPattern06_init;
                 new_input_bool = false;
@@ -120,13 +124,17 @@ void led_patterns(int key_input)
             break;
         case 7:             // fill to the left, extra credit
             break;
+        default:
+            P3OUT = ledOff;
+            break;
     }
 }
 
-void call_led_bar()
+void set_led_bar(char key)
 {
-
-    led_patterns(4);
+    key_input = key;       // Update global key_input for ISR
+    new_input_bool = true;
+    led_patterns(key_input);
 }
 
 
@@ -136,7 +144,7 @@ void call_led_bar()
 #pragma vector = TIMER1_B0_VECTOR
 __interrupt void ISR_TB1_CCR0(void)
 {
-    led_patterns(input);
+    led_patterns(key_input);
     TB1CCTL0 &= ~CCIFG;
 }
 //-- End Interrupt Service Routines --------------------------------------------

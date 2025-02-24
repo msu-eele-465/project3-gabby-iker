@@ -71,8 +71,23 @@ void init_rgb_led(void)
 
     Initialize_PinsRGB();
     Initialize_Interrupts();
-    led_c4921d();
-       
+    led_c43e1d();
+}
+
+void continue_rgb_led(int lockState)
+{
+    switch (lockState) {
+        case 0:                 // Unlocking, set yellow
+            led_c4921d();
+            break;
+        case 1:                 // Unlocked, set blue
+            led_1da2c4();
+            break;
+        default:                 // Locked, set red
+            led_c43e1d();
+            break;
+    
+    }
 }
 
 #pragma vector = TIMER3_B0_VECTOR
