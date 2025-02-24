@@ -36,14 +36,8 @@ void InitializePorts_KeyPad()
     P1OUT |= 0x0F;    // Activar pull-up in rows
     
     // Set columns as outputs
-    //P2DIR |= 0x17;    // P2.0, P2.1, P2.2 y P2.4 as outputs
-    //P2OUT &= ~0x17;   // Initalize columns down
-
-    // Configura P5.0, P5.1, P5.2 y P5.3 como salidas:
-    P5DIR |= BIT0 | BIT1 | BIT2 | BIT3;
-    
-    // Pone en bajo los pines P5.0, P5.1, P5.2 y P5.3:
-    P5OUT &= ~(BIT0 | BIT1 | BIT2 | BIT3);
+    P5DIR |= BIT0 | BIT1 | BIT2 | BIT3; // Set P5.0, P5.1, P5.2 y P5.3 as outputs:
+    P5OUT &= ~(BIT0 | BIT1 | BIT2 | BIT3);  // Set down the pins P5.0, P5.1, P5.2 y P5.3:
 }
 
 // Read digit from keypad function
@@ -55,21 +49,20 @@ int row, col;
     for (col = 0; col < 4; col++) {
         // Put column down (active)
         P5OUT &= ~(1 << col);   // P2.0, P2.1, P2.2, P2.4
-         __delay_cycles(1000);  // Pequeña pausa para estabilizar la señal
+         __delay_cycles(1000);  // Little stop to stabilize the signal
 
         // Recorre las 4 filas
         for (row = 0; row < 4; row++) {
-            if ((P1IN & (1 << row)) == 0) {  // Se detecta que la fila está en bajo
-                debounce();  // Espera para filtrar el rebote
-                //if ((P1IN & (1 << row)) == 0) {  // Confirma que la tecla sigue presionada
+            if ((P1IN & (1 << row)) == 0) {  // We detect that the row is low
+                debounce();  // Wait to filter the bouncing
+                if ((P1IN & (1 << row)) == 0) {  // Confirm that the key is pressed
                     char key = keypad[row][col];
-                    // Espera a que se suelte la tecla para evitar múltiples lecturas
-                    while ((P1IN & (1 << row)) == 0){
-                    // Desactiva la columna antes de retornar
-                    P5OUT |= (1 << col);
+                    // Wait until the key is released to avoid multiple readings 
+                    while ((P1IN & (1 << row)) == 0);
+                    // Deactivate the column before returning
+                    P5OUT |= (1 << col);                    
                     return key;
-                    }
-                //}
+                }
             }
         }
         // Put the column high (desactivated)
@@ -91,13 +84,10 @@ int main(void)
     PM5CTL0 &= ~LOCKLPM5;
     
     int counter, i, equal;
-    char introduced_password[TABLE_SIZE], key;
-    
-   
+    char introduced_password[TABLE_SIZE], key; 
 
     InitializePorts_KeyPad();
-    
-    
+      
     while(true)
     {   
 
@@ -136,7 +126,7 @@ int main(void)
         else 
         {
             printf("Incorrect code. Try again.\n");
-            counter = 0;  // Reinicia el índice para volver a intentar
+            counter = 0;  // Reinitiate counter to try again
         }    
     }    
 }
