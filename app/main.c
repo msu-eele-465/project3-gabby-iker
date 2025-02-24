@@ -18,7 +18,7 @@ void debounce() {
     }
 }
 
-char real_code[] = {'3','9','4','1'};
+char real_code[] = {'3','9','4','D'};
 
 char keypad[ROW][COL] = {
     {'1', '2', '3', 'A'},
@@ -36,53 +36,15 @@ void InitializePorts_KeyPad()
     P1OUT |= 0x0F;    // Activar pull-up in rows
     
     // Set columns as outputs
-    P2DIR |= 0x17;    // P2.0, P2.1, P2.2 y P2.4 as outputs
-    P2OUT &= ~0x17;   // Initalize columns down
-}
+    //P2DIR |= 0x17;    // P2.0, P2.1, P2.2 y P2.4 as outputs
+    //P2OUT &= ~0x17;   // Initalize columns down
 
-//void Initialize_PinsRGB()
-//{       
-//    P1DIR |= BIT5 | BIT6 | BIT7; // Set P1.5, P1.6 y P1.7 as an output 
-//    P1OUT &= ~(BIT5 | BIT6 | BIT7); // Initialize outputs as low
-  //  P1OUT |= BIT5;
-    //P1OUT |= BIT6;
-//    P1OUT |= BIT7;
-//}
-
-//void Initialize_Interrupts()
-//{
-    //Set up timer 3
-  //  TB3CTL |= TBCLR;
-    //TB3CTL |= TBSSEL__ACLK;
+    // Configura P5.0, P5.1, P5.2 y P5.3 como salidas:
+    P5DIR |= BIT0 | BIT1 | BIT2 | BIT3;
     
-    //Set up timer compare 3.1 (Pull up)
-    //TB3CCTL0 &= ~CCIFG;
-    //TB3CCTL0 |= CCIE;
-    //TB3CCR0 |= 255;
-
-    //Set up timer compare 3.2 (Pull down RED)
-    //TB3CCTL1 &= ~CCIFG;
-    //TB3CCTL1 |= CCIE;
-    //TB3CCR1 |= 196;
-    //TB3CCTL1 |= OUTMOD__7;
-
-    //Set up timer compare 3.3 (Pull down GREEN)
-    //TB3CCTL2 &= ~CCIFG;
-    //TB3CCTL2 |= CCIE;
-    //TB3CCR2 |= 62;
-    //TB3CCTL2 | = OUTMOD_7;
-
-    //Set up timer compare 3.4 (Pull down BLUE)
-    //TB3CCTL3 &= ~CCIFG;
-    //TB3CCTL3 |= CCIE;
-    //TB3CCR3 |= 29;
-    //TB3CCTL3 | = OUTMOD_7;
-
-    //TB3CTL |= MC__UP;
-
-
-    //_enable_interrupt();
-//}
+    // Pone en bajo los pines P5.0, P5.1, P5.2 y P5.3:
+    P5OUT &= ~(BIT0 | BIT1 | BIT2 | BIT3);
+}
 
 // Read digit from keypad function
 char read_digit()
@@ -92,7 +54,7 @@ int row, col;
     // Go through 4 columns
     for (col = 0; col < 4; col++) {
         // Put column down (active)
-        P2OUT &= ~(1 << col);   // P2.0, P2.1, P2.2, P2.4
+        P5OUT &= ~(1 << col);   // P2.0, P2.1, P2.2, P2.4
          __delay_cycles(1000);  // Pequeña pausa para estabilizar la señal
 
         // Recorre las 4 filas
@@ -104,14 +66,14 @@ int row, col;
                     // Espera a que se suelte la tecla para evitar múltiples lecturas
                     while ((P1IN & (1 << row)) == 0){
                     // Desactiva la columna antes de retornar
-                    P2OUT |= (1 << col);
+                    P5OUT |= (1 << col);
                     return key;
                     }
                 //}
             }
         }
         // Put the column high (desactivated)
-        P2OUT |= (1 << col);
+        P5OUT |= (1 << col);
     }
 
     return 0; // No key pressed
@@ -134,8 +96,7 @@ int main(void)
    
 
     InitializePorts_KeyPad();
-    //Initialize_PinsRGB();
-    //Initialize_Interrupts();
+    
     
     while(true)
     {   
@@ -179,33 +140,3 @@ int main(void)
         }    
     }    
 }
-
-//#pragma vector = TIMER3_B0_VECTOR
-//__interrupt void ISR_TB3_CCR0(void)
-//{
-//    P1OUT |= BIT5;
-//    P1OUT |= BIT6;
-//    P1OUT |= BIT7;
-//    TB3CCTL0 &= ~CCIFG;
-//}
-
-//#pragma vector = TIMER3_B1_VECTOR
-//__interrupt void ISR_TB3_CCR1(void)
-//{
-//    P1OUT &=~ BIT5;
-//    TB3CCTL1 &= ~CCIFG;
-//}
-
-//#pragma vector = TIMER3_B2_VECTOR
-//__interrupt void ISR_TB3_CCR2(void)
-//{
-//    P1OUT &=~ BIT6;
-//    TB3CCTL2 &= ~CCIFG;
-//}
-
-//#pragma vector = TIMER3_B3_VECTOR
-//__interrupt void ISR_TB3_CCR3(void)
-//{
-//    P1OUT &=~ BIT7;
-//    TB3CCTL3 &= ~CCIFG;
-//}
