@@ -4,14 +4,23 @@
 #include <stdbool.h>
 #include "led_bar.h"
 
-//int key_input;
 int new_input_bool = true;
 int pattern3_out = true;
-volatile int key_input;
-int current_pattern;
-int next_pattern;
-char current_key;
-char next_key;
+int pattern1_cur;
+int pattern2_cur;
+int pattern3_cur;
+int pattern4_cur;
+int pattern5_cur;
+int pattern6_cur;
+int pattern_prev = 0;
+char key_cur;
+char key_prev = '\0';
+bool pattern1_start = false;
+bool pattern2_start = false;
+bool pattern3_start = false;
+bool pattern4_start = false;
+bool pattern5_start = false;
+bool pattern6_start = false;
 
 //------------------------------------------------------------------------------
 // Begin led initialization
@@ -19,9 +28,9 @@ char next_key;
 void init_led_bar()
 {
     #define ledOn 0xFF
-    #define ledOff 0x0
+    #define ledOff 0
     #define ledPattern01_init 0b10101010
-    #define ledPattern02_init 0x0
+    #define ledPattern02_init 0
     #define ledPattern03_init 0b00011000
     #define ledPattern04_init 0xFF
     #define ledPattern05_init 0b00000001
@@ -56,9 +65,9 @@ void init_led_bar()
 //------------------------------------------------------------------------------
 // Begin LED patterns
 //------------------------------------------------------------------------------
-void led_patterns(char key_input) 
+void led_patterns(char key_cur) 
 {
-    switch(key_input)
+    switch(key_cur)
     {
         case 'A':
             if (TB1CCR0 - 8192 > 0)
@@ -73,54 +82,90 @@ void led_patterns(char key_input)
             break;
         case '1':           // Toggle
             if (new_input_bool == true) {
-                P3OUT = ledPattern01_init;
+                if (key_cur == key_prev | pattern1_start == false)
+                {
+                    P3OUT = ledPattern01_init;
+                    pattern1_start = true;
+                }
+                else
+                    P3OUT = pattern1_cur;
                 new_input_bool = false;
             } else
-                P3OUT ^= 0xFF;
+                pattern1_cur = (P3OUT ^= 0xFF);
             break;
         case '2':             // Up counter
             if (new_input_bool == true) {
-                P3OUT = ledPattern02_init;
+                if (key_cur == key_prev | pattern2_start == false)
+                {
+                    P3OUT = ledPattern02_init;
+                    pattern2_start = true;
+                }
+                else
+                    P3OUT = pattern2_cur;
                 new_input_bool = false;
             } else
-                P3OUT++;
+                pattern2_cur = (P3OUT++);
             break;
         case '3':             // in and out
             if (new_input_bool == true) {
-                P3OUT = ledPattern03_init;
+                if (key_cur == key_prev | pattern3_start == false)
+                {
+                    P3OUT = ledPattern03_init;
+                    pattern3_start = true;
+                }
+                else
+                    P3OUT = pattern3_cur;
                 new_input_bool = false;
             }
             else if ((pattern3_out == true & P3OUT != 0b10000001) | (pattern3_out == false & P3OUT == 0b00011000))  // out
             {
-                P3OUT = ~P3OUT & ((0xF0 & P3OUT << 1) | (0xF & P3OUT >> 1) | P3OUT << 7 | P3OUT >> 7);
+                pattern3_cur = (P3OUT = ~P3OUT & ((0xF0 & P3OUT << 1) | (0xF & P3OUT >> 1) | P3OUT << 7 | P3OUT >> 7));
                 pattern3_out = true;
             }
             else if ((pattern3_out == false & P3OUT != 0b00011000) | (pattern3_out == true & P3OUT == 0b10000001))  // in
             {
-                P3OUT = ~P3OUT & ((0xF & P3OUT << 1) | (0xF0 & P3OUT >> 1) | P3OUT << 7 | P3OUT >> 7);
+                pattern3_cur = (P3OUT = ~P3OUT & ((0xF & P3OUT << 1) | (0xF0 & P3OUT >> 1) | P3OUT << 7 | P3OUT >> 7));
                 pattern3_out = false;
             }
             break;
         case '4':             // down counter, extra credit
             if (new_input_bool == true) {
-                P3OUT = ledPattern04_init;
+                if (key_cur == key_prev | pattern4_start == false)
+                {
+                    P3OUT = ledPattern04_init;
+                    pattern4_start = true;
+                }
+                else
+                    P3OUT = pattern4_cur;
                 new_input_bool = false;
             } else
-                P3OUT--;
+                pattern4_cur = (P3OUT--);
             break;
         case '5':             // rotate one left, extra credit
         if (new_input_bool == true) {
-                P3OUT = ledPattern05_init;
+            if (key_cur == key_prev | pattern5_start == false)
+                {
+                    P3OUT = ledPattern05_init;
+                    pattern5_start = true;
+                }
+            else
+                P3OUT = pattern5_cur;
                 new_input_bool = false;
             } else
-                P3OUT = P3OUT << 1 | P3OUT >> 7;
+                pattern5_cur = (P3OUT = P3OUT << 1 | P3OUT >> 7);
             break;
         case '6':             // rotate 7 right, extra credit
             if (new_input_bool == true) {
-                P3OUT = ledPattern06_init;
+                if (key_cur == key_prev | pattern6_start == false)
+                {
+                    P3OUT = ledPattern06_init;
+                    pattern6_start = true;
+                }
+                else
+                    P3OUT = pattern6_cur;
                 new_input_bool = false;
             } else
-                P3OUT = P3OUT >> 1 | P3OUT << 7;
+                pattern6_cur = (P3OUT = P3OUT >> 1 | P3OUT << 7);
             break;
         case 7:             // fill to the left, extra credit
             break;
@@ -130,11 +175,12 @@ void led_patterns(char key_input)
     }
 }
 
-void set_led_bar(char key)
+void set_led_bar(char key_input)
 {
-    key_input = key;       // Update global key_input for ISR
+    key_prev = key_cur;
+    key_cur = key_input;       // Update global key_cur for ISR
     new_input_bool = true;
-    led_patterns(key_input);
+    led_patterns(key_cur);
 }
 
 
@@ -144,7 +190,7 @@ void set_led_bar(char key)
 #pragma vector = TIMER1_B0_VECTOR
 __interrupt void ISR_TB1_CCR0(void)
 {
-    led_patterns(key_input);
+    led_patterns(key_cur);
     TB1CCTL0 &= ~CCIFG;
 }
 //-- End Interrupt Service Routines --------------------------------------------
