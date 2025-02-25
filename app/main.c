@@ -44,39 +44,6 @@ void InitializePorts_KeyPad()
     P5OUT &= ~(BIT0 | BIT1 | BIT2 | BIT3);  // Set down the pins P5.0, P5.1, P5.2 y P5.3:
 }
 
-// Read digit from keypad function
-char read_digit()
-{
-int row, col;
-
-    // Go through 4 columns
-    for (col = 0; col < 4; col++) {
-        // Put column down (active)
-        P5OUT &= ~(1 << col);   // P2.0, P2.1, P2.2, P2.4
-         __delay_cycles(1000);  // Little stop to stabilize the signal
-
-        // Recorre las 4 filas
-        for (row = 0; row < 4; row++) {
-            if ((P1IN & (1 << row)) == 0) {  // We detect that the row is low
-
-                debounce();  // Wait to filter the bouncing
-                if ((P1IN & (1 << row)) == 0) {  // Confirm that the key is pressed
-                    char key = keypad[row][col];
-                    // Wait until the key is released to avoid multiple readings 
-                    while ((P1IN & (1 << row)) == 0);
-                    // Deactivate the column before returning
-                    P5OUT |= (1 << col);                    
-                    return key;
-                }
-            }
-        }
-        // Put the column high (desactivated)
-        P5OUT |= (1 << col);
-    }
-
-    return 0; // No key pressed
-}
-
 char System_Unlocking(void)
 {
     int row, col;

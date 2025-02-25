@@ -51,6 +51,7 @@
                                     <listOptionValue value="${CCS_BASE_ROOT}/msp430/include"/>
                                     <listOptionValue value="${PROJECT_ROOT}"/>
                                     <listOptionValue value="${CG_TOOL_ROOT}/include"/>
+                                    <listOptionValue value="${PROJECT_ROOT}/../src"/>
                                 </option>
                                 <option id="com.ti.ccstudio.buildDefinitions.MSP430_21.6.compilerID.ADVICE__POWER.789372250" superClass="com.ti.ccstudio.buildDefinitions.MSP430_21.6.compilerID.ADVICE__POWER" value="all" valueType="string"/>
                             </tool>
