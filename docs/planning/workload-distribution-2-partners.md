@@ -6,27 +6,27 @@ You are encouraged to support each other with an overall goal of successfully co
 
 You will submit this form at least twice.  Once before the project starts.  This is to document your intention.  Then, again at completion.  This is to document any deviation from the initial plan.  
 
-| Workload                                                          | Total | Partner 1 | Partner 2 |
-|-------------------------------------------------------------------|-------|-----------|-----------|
-|Introduction                                                       | 1     |           |           |
-|Circuit diagram                                                    | 1     |           |           |
-|Main loop flowchart                                                | 1     |           |           |
-|System architecture diagram                                        | 1     |           |           |
-|Professional demo                                                  | 2     |           |           |
-|System starts in a locked state                                    | 0.5   |           |           |
-|Unlock code works and is 4-digits long                             | 4     |           |           |
-|LED is set to correct color when locked                            | 0.5   |           |           |
-|LED is set to correct color when being unlocked                    | 0.5   |           |           |
-|LED is set to correct color when unlocked                          | 0.5   |           |           |
-|Extra credit: LED is set to a unique color for each LED pattern    | 0     |           |           |
-|When the system is locked, all LEDs are off                        | 0.5   |           |           |
-|When LEDs are off until a user selects a pattern                   | 0.5   |           |           |
-|When the selected pattern is the same, the pattern restarts        | 0.5   |           |           |
-|When a new pattern is selected, the pattern must start within 1 s  | 2     |           |           |
-|Previously selected pattern starts where it left off               | 0.5   |           |           |
-|LED pattern transition period is changeable                        | 2     |           |           |
-|LED pattern 0                                                      | 0.5   |           |           |
-|LED pattern 1                                                      | 0.5   |           |           |
-|LED pattern 2                                                      | 0.5   |           |           |
-|LED pattern 3                                                      | 0.5   |           |           |
-|                                                                   | 20    |           |           |
+| Workload                                                          | Total | Gab Plan  | Iker Plan | Gab Final | Iker Final|
+|-------------------------------------------------------------------|-------|-----------|-----------|-----------|-----------|
+|Introduction                                                       | 1     | 0.5       | 0.5       | 0.5       | 0.5       |
+|Circuit diagram                                                    | 1     | 0.5       | 0.5       | 0.75      | 0.25      |
+|Main loop flowchart                                                | 1     | 0         | 1         | 0         | 1         |
+|System architecture diagram                                        | 1     | 0.5       | 0.5       | 0.25      | 0.75      |
+|Professional demo                                                  | 2     | 1         | 1         | 1         | 1         |
+|System starts in a locked state                                    | 0.5   | 0         | 0.5       | 0         | 0.5       |
+|Unlock code works and is 4-digits long                             | 4     | 0         | 4         | 0         | 4         |
+|LED is set to correct color when locked                            | 0.5   | 0         | 0.5       | 0.25      | 0.25      |
+|LED is set to correct color when being unlocked                    | 0.5   | 0         | 0.5       | 0.25      | 0.25      |
+|LED is set to correct color when unlocked                          | 0.5   | 0         | 0.5       | 0.25      | 0.25      |
+|Extra credit: LED is set to a unique color for each LED pattern    | 0     | 0         | 0         | 0         | 0         |
+|When the system is locked, all LEDs are off                        | 0.5   | 0.25      | 0.25      | 0.25      | 0.25      |
+|When LEDs are off until a user selects a pattern                   | 0.5   | 0.25      | 0.25      | 0.25      | 0.25      |
+|When the selected pattern is the same, the pattern restarts        | 0.5   | 0.5       | 0         | 0.5       | 0         |
+|When a new pattern is selected, the pattern must start within 1 s  | 2     | 2         | 0         | 2         | 0         |
+|Previously selected pattern starts where it left off               | 0.5   | 0.5       | 0         | 0.5       | 0         |
+|LED pattern transition period is changeable                        | 2     | 2         | 0         | 2         | 0         |
+|LED pattern 0                                                      | 0.5   | 0.5       | 0         | 0.5       | 0         |
+|LED pattern 1                                                      | 0.5   | 0.5       | 0         | 0.5       | 0         |
+|LED pattern 2                                                      | 0.5   | 0.5       | 0         | 0.5       | 0         |
+|LED pattern 3                                                      | 0.5   | 0.5       | 0         | 0.5       | 0         |
+|                                                                   | 20    | 10        |  10       | 10.75     | 9.25      |
